@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Media Plan Generator</title>
+<meta name="description" content="Build a paid media plan in a minute: channel split, estimated results and a weekly flowchart for Pakistan, the Gulf, the US and the UK.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #FFFFFF;
+  --wash: #F1F4F6;
+  --ink: #16202A;
+  --muted: #5E6B76;
+  --rule: #D9DEE3;
+  --accent: #0E5E6F;
+  --accent-soft: #DCEBEE;
+  --warn: #9A4A12;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--wash); color: var(--ink);
+  font: 16px/1.5 "Source Sans 3", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+h1, h2, h3, .num-big { font-family: "Archivo", "Arial Narrow", Arial, sans-serif; }
+h1 { font-size: 2.4rem; font-stretch: 80%; font-weight: 800; line-height: 1.05; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; font-stretch: 85%; font-weight: 700; margin: 0 0 4px; }
+h3 { font-size: 1rem; font-weight: 600; margin: 0 0 8px; }
+p { margin: 0 0 12px; }
+.muted { color: var(--muted); }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 32px 24px 64px; }
+header.top { display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
+header.top p { max-width: 60ch; margin: 0; color: var(--muted); }
+.layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+
+/* Brief panel */
+.brief { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 20px; position: sticky; top: 16px; }
+.field { margin-bottom: 16px; }
+.field label, .field .label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 4px; }
+.field small { display: block; color: var(--muted); font-size: .8rem; margin-top: 3px; }
+input[type=number], select {
+  width: 100%; padding: 9px 10px; border: 1px solid var(--rule); border-radius: 6px;
+  font: inherit; color: var(--ink); background: var(--paper);
+}
+input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.checks { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+.checks label { display: flex; gap: 8px; align-items: center; font-weight: 400; font-size: .95rem; cursor: pointer; }
+.checks input { accent-color: var(--accent); width: 16px; height: 16px; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; background: var(--paper); padding: 8px 4px; font: inherit; font-size: .88rem; cursor: pointer; color: var(--ink); }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed=true] { background: var(--accent); color: #fff; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.btn { border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 6px; padding: 9px 14px; font: inherit; font-weight: 600; cursor: pointer; }
+.btn.ghost { background: var(--paper); color: var(--accent); }
+
+/* Plan */
+.plan { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.plan section { padding: 24px; border-top: 1px solid var(--rule); }
+.plan section:first-child { border-top: 0; }
+.headline { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 0; }
+.headline > div { padding: 4px 16px 4px 0; }
+.headline > div + div { padding-left: 16px; border-left: 1px solid var(--rule); }
+.num-big { font-size: 1.9rem; font-weight: 700; font-stretch: 80%; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.headline .k { color: var(--muted); font-size: .88rem; }
+.plan-title { margin-bottom: 16px; }
+
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-weight: 600; color: var(--muted); font-size: .85rem; vertical-align: bottom; }
+tfoot td { font-weight: 600; border-bottom: 0; border-top: 2px solid var(--ink); }
+.scroll { overflow-x: auto; }
+.chan { display: inline-flex; align-items: center; gap: 8px; }
+.swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.pct-input { width: 64px; padding: 5px 6px; text-align: right; }
+.range { color: var(--muted); font-size: .85rem; }
+
+/* Flowchart */
+.flow { border-collapse: separate; border-spacing: 0; }
+.flow th, .flow td { border-bottom: 1px solid var(--rule); padding: 0; }
+.flow thead th { padding: 6px 4px; text-align: center; font-size: .78rem; }
+.flow tbody th { padding: 10px 12px 10px 0; text-align: left; font-weight: 600; background: var(--paper); position: sticky; left: 0; z-index: 1; }
+.flow td { min-width: 58px; height: 44px; border-left: 1px solid var(--rule); position: relative; }
+.flow .burst { position: absolute; inset: 9px 3px; border-radius: 3px; display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+.flow .burst.light { color: var(--ink); }
+.flow tfoot td { text-align: center; font-size: .78rem; padding: 8px 2px; border-top: 2px solid var(--ink); font-weight: 600; }
+.flow tfoot th { text-align: left; padding: 8px 12px 8px 0; border-top: 2px solid var(--ink); }
+
+details.assume summary { cursor: pointer; font-weight: 600; font-family: "Archivo", Arial, sans-serif; font-size: 1.1rem; }
+.bench input { width: 76px; padding: 5px 6px; text-align: right; }
+.note { background: #FBF3E8; border: 1px solid #EBD3B4; color: var(--warn); border-radius: 6px; padding: 10px 12px; font-size: .9rem; margin: 12px 0; }
+footer { color: var(--muted); font-size: .85rem; margin-top: 24px; }
+footer a { color: var(--accent); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .brief { position: static; }
+  .headline { grid-template-columns: 1fr 1fr; gap: 12px 0; }
+  .headline > div:nth-child(3) { padding-left: 0; border-left: 0; }
+  h1 { font-size: 2rem; }
+}
+@media print {
+  body { background: #fff; }
+  .brief, .actions, details.assume, footer { display: none; }
+  .layout { grid-template-columns: 1fr; }
+  .plan { border: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Media Plan Generator</h1>
+    </div>
+    <p>Enter a budget and a goal to get a channel split, estimated results and a weekly flowchart.
+      Estimates use editable benchmarks, so swap in your own account data for real planning.</p>
+  </header>
+
+  <div class="layout">
+    <form class="brief" id="brief" onsubmit="return false" aria-label="Campaign brief">
+      <div class="field">
+        <label for="market">Market</label>
+        <select id="market"></select>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="budget">Total budget</label>
+          <input id="budget" type="number" min="0" step="1000" value="1500000">
+          <small id="budget-cur">PKR</small>
+        </div>
+        <div class="field">
+          <label for="weeks">Weeks</label>
+          <input id="weeks" type="number" min="1" max="26" value="8">
+        </div>
+      </div>
+      <div class="field">
+        <label for="objective">Objective</label>
+        <select id="objective">
+          <option value="awareness">Awareness and reach</option>
+          <option value="traffic">Website traffic</option>
+          <option value="leads" selected>Leads</option>
+          <option value="b2b">B2B leads</option>
+          <option value="sales">Online sales</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="label" id="ch-label">Channels</span>
+        <div class="checks" id="channels" role="group" aria-labelledby="ch-label"></div>
+      </div>
+      <div class="field">
+        <span class="label" id="fl-label">Flighting</span>
+        <div class="seg" id="flighting" role="group" aria-labelledby="fl-label">
+          <button type="button" data-v="even" aria-pressed="true">Always on</button>
+          <button type="button" data-v="launch" aria-pressed="false">Launch burst</button>
+          <button type="button" data-v="pulse" aria-pressed="false">Pulsing</button>
+        </div>
+        <small id="fl-help">Same spend every week.</small>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" id="dl">Download CSV</button>
+        <button type="button" class="btn ghost" id="share">Copy share link</button>
+        <button type="button" class="btn ghost" id="print">Print</button>
+      </div>
+    </form>
+
+    <main class="plan" id="plan">
+      <section>
+        <div class="plan-title">
+          <h2 id="plan-h"></h2>
+          <p class="muted" id="plan-sub"></p>
+        </div>
+        <div class="headline" id="headline"></div>
+      </section>
+
+      <section>
+        <h2>Channel split</h2>
+        <p class="muted">Recommended for the objective. Edit any share and the rest of the plan updates.
+          <button type="button" class="btn ghost" id="reset" style="padding:3px 10px;font-size:.85rem;margin-left:6px">Reset split</button></p>
+        <div class="scroll"><table id="alloc"></table></div>
+      </section>
+
+      <section>
+        <h2>Weekly flowchart</h2>
+        <p class="muted">Spend per channel per week. Darker blocks carry more budget.</p>
+        <div class="scroll"><table class="flow" id="flow"></table></div>
+      </section>
+
+      <section>
+        <details class="assume">
+          <summary>Benchmarks and assumptions</summary>
+          <div class="note">These are rough starting points for planning conversations, not guarantees.
+            Real costs vary by industry, season, audience size and creative. Replace them with figures from
+            your own ad accounts. Your edits apply to this session and to share links.</div>
+          <div class="row2" style="max-width:420px">
+            <div class="field"><label for="fx">USD to <span id="fx-cur">PKR</span></label>
+              <input id="fx" type="number" step="0.01"></div>
+            <div class="field"><label for="spread">Estimate range</label>
+              <select id="spread"><option value="0.15">Narrow (15%)</option><option value="0.25" selected>Normal (25%)</option><option value="0.4">Wide (40%)</option></select></div>
+          </div>
+          <div class="scroll"><table class="bench" id="bench"></table></div>
+          <p class="muted" style="margin-top:12px">CPM is in USD. CTR is clicks per impression. Conversion
+            rate is the share of clicks that become a lead or sale. Frequency is the average number of times
+            each person sees the ads over the whole flight, used to estimate reach.</p>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <footer>Built by Ghazanfar Ali. Open source under the MIT license.
+    <a href="https://github.com/">View the code on GitHub</a>.</footer>
+</div>
+
+<script>
+const CHANNELS = [
+  { id: 'meta',    name: 'Meta (Facebook, Instagram)', short: 'Meta',    color: '#3A4FA8' },
+  { id: 'search',  name: 'Google Search',              short: 'Search',  color: '#1E7F55' },
+  { id: 'youtube', name: 'YouTube',                    short: 'YouTube', color: '#B23A2E' },
+  { id: 'display', name: 'Google Display / Demand Gen', short: 'Display', color: '#6E8B3D' },
+  { id: 'tiktok',  name: 'TikTok',                     short: 'TikTok',  color: '#2E3A44' },
+  { id: 'snap',    name: 'Snapchat',                   short: 'Snapchat',color: '#C99A06' },
+  { id: 'linkedin',name: 'LinkedIn',                   short: 'LinkedIn',color: '#0E6F95' }
+];
+
+// Indicative benchmarks: [CPM USD, CTR %, conversion rate %, frequency]
+const MARKETS = {
+  pk: { name: 'Pakistan', cur: 'PKR', fx: 280, b: {
+    meta: [0.8, 1.0, 4, 3], search: [8, 5, 6, 2], youtube: [1.2, 0.3, 2, 3], display: [0.5, 0.4, 1.5, 4],
+    tiktok: [0.6, 0.8, 2.5, 3], snap: [1.0, 0.5, 2, 3], linkedin: [6, 0.5, 3, 2] } },
+  ae: { name: 'United Arab Emirates', cur: 'AED', fx: 3.67, b: {
+    meta: [5, 0.9, 5, 3], search: [60, 4, 6, 2], youtube: [6, 0.3, 2, 3], display: [2, 0.4, 1.5, 4],
+    tiktok: [4, 0.8, 2.5, 3], snap: [4, 0.6, 2, 3], linkedin: [35, 0.5, 3, 2] } },
+  sa: { name: 'Saudi Arabia', cur: 'SAR', fx: 3.75, b: {
+    meta: [4, 1.0, 5, 3], search: [45, 4.5, 6, 2], youtube: [5, 0.3, 2, 3], display: [1.8, 0.4, 1.5, 4],
+    tiktok: [3.5, 0.9, 2.5, 3], snap: [3, 0.7, 2.5, 3], linkedin: [30, 0.5, 3, 2] } },
+  us: { name: 'United States', cur: 'USD', fx: 1, b: {
+    meta: [12, 1.0, 6, 3], search: [90, 5, 7, 2], youtube: [10, 0.3, 2, 3], display: [3, 0.4, 1.5, 4],
+    tiktok: [8, 0.9, 3, 3], snap: [7, 0.6, 2, 3], linkedin: [45, 0.5, 3, 2] } },
+  uk: { name: 'United Kingdom', cur: 'GBP', fx: 0.78, b: {
+    meta: [8, 1.0, 5, 3], search: [70, 5, 6, 2], youtube: [8, 0.3, 2, 3], display: [2.5, 0.4, 1.5, 4],
+    tiktok: [6, 0.9, 2.5, 3], snap: [5, 0.6, 2, 3], linkedin: [40, 0.5, 3, 2] } }
+};
+
+// Recommended weight of each channel per objective (normalised over selected channels)
+const WEIGHTS = {
+  awareness: { meta: 30, youtube: 30, tiktok: 20, snap: 10, display: 10, search: 0, linkedin: 5 },
+  traffic:   { meta: 30, search: 20, youtube: 15, tiktok: 15, display: 10, snap: 5, linkedin: 5 },
+  leads:     { search: 35, meta: 35, linkedin: 10, tiktok: 8, youtube: 5, display: 4, snap: 3 },
+  b2b:       { linkedin: 40, search: 35, meta: 15, youtube: 5, display: 5, tiktok: 0, snap: 0 },
+  sales:     { search: 40, meta: 35, display: 10, tiktok: 7, youtube: 5, snap: 3, linkedin: 0 }
+};
+const DEFAULT_CHANNELS = {
+  awareness: ['meta', 'youtube', 'tiktok', 'snap'], traffic: ['meta', 'search', 'tiktok'],
+  leads: ['meta', 'search', 'tiktok'], b2b: ['linkedin', 'search', 'meta'], sales: ['search', 'meta', 'display']
+};
+const KPI = {
+  awareness: { label: 'Estimated reach', unitCost: 'CPM' },
+  traffic:   { label: 'Estimated clicks', unitCost: 'Cost per click' },
+  leads:     { label: 'Estimated leads', unitCost: 'Cost per lead' },
+  b2b:       { label: 'Estimated leads', unitCost: 'Cost per lead' },
+  sales:     { label: 'Estimated sales', unitCost: 'Cost per sale' }
+};
+const FLIGHT_HELP = {
+  even: 'Same spend every week.',
+  launch: 'Heavier first two weeks to build momentum, then a steady level.',
+  pulse: 'Awareness channels run on alternate weeks. Search and lead channels stay on.'
+};
+
+const $ = id => document.getElementById(id);
+const state = {
+  market: 'pk', budget: 1500000, weeks: 8, objective: 'leads', flighting: 'even',
+  channels: [...DEFAULT_CHANNELS.leads], custom: null, bench: null, fx: null, spread: 0.25
+};
+
+function bench() { return state.bench || JSON.parse(JSON.stringify(MARKETS[state.market].b)); }
+function fx() { return state.fx || MARKETS[state.market].fx; }
+function cur() { return MARKETS[state.market].cur; }
+
+function fmtMoney(n) {
+  const c = cur();
+  const digits = (c === 'PKR') ? 0 : (n < 100 ? 2 : 0);
+  return c + ' ' + n.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: digits });
+}
+function rgba(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${n >> 16}, ${(n >> 8) & 255}, ${n & 255}, ${a.toFixed(2)})`;
+}
+function fmtNum(n) {
+  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M';
+  if (n >= 1e4) return Math.round(n / 1e3) + 'K';
+  return Math.round(n).toLocaleString('en-US');
+}
+function fmtShort(n) {
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return Math.round(n / 1e3) + 'K';
+  return Math.round(n).toString();
+}
+
+function shares() {
+  if (state.custom) return state.custom;
+  const w = WEIGHTS[state.objective];
+  const sel = state.channels;
+  let total = sel.reduce((s, c) => s + (w[c] || 0), 0);
+  const out = {};
+  if (total === 0) { sel.forEach(c => out[c] = 100 / sel.length); return out; }
+  sel.forEach(c => out[c] = (w[c] || 0) / total * 100);
+  return out;
+}
+
+function weekly(channelId) {
+  const n = state.weeks;
+  let f = Array(n).fill(1);
+  if (state.flighting === 'launch' && n >= 3) {
+    f = f.map((_, i) => i < 2 ? 1.6 : 0.85);
+  } else if (state.flighting === 'pulse' && ['meta', 'youtube', 'tiktok', 'snap', 'display'].includes(channelId)
+             && !(['leads', 'b2b', 'sales'].includes(state.objective) && channelId === 'meta')) {
+    f = f.map((_, i) => i % 2 === 0 ? 1 : 0);
+  }
+  const sum = f.reduce((a, b) => a + b, 0) || 1;
+  return f.map(x => x / sum);
+}
+
+function compute() {
+  const s = shares(), b = bench(), rate = fx();
+  const rows = state.channels.map(id => {
+    const [cpmUsd, ctr, cvr, freq] = b[id];
+    const budget = state.budget * (s[id] || 0) / 100;
+    const cpm = cpmUsd * rate;
+    const impressions = cpm > 0 ? budget / cpm * 1000 : 0;
+    const clicks = impressions * ctr / 100;
+    const conversions = clicks * cvr / 100;
+    const reach = impressions / Math.max(freq, 1);
+    return { id, share: s[id] || 0, budget, cpm, impressions, clicks, conversions, reach,
+      cpc: clicks ? budget / clicks : 0, cpa: conversions ? budget / conversions : 0, week: weekly(id) };
+  });
+  const t = rows.reduce((a, r) => ({
+    budget: a.budget + r.budget, impressions: a.impressions + r.impressions, clicks: a.clicks + r.clicks,
+    conversions: a.conversions + r.conversions, reach: a.reach + r.reach
+  }), { budget: 0, impressions: 0, clicks: 0, conversions: 0, reach: 0 });
+  // People overlap across channels, so total reach is discounted
+  t.reach = t.reach * (rows.length > 1 ? 0.8 : 1);
+  return { rows, t };
+}
+
+function render() {
+  const m = MARKETS[state.market];
+  $('budget-cur').textContent = m.cur;
+  $('fx-cur').textContent = m.cur;
+  $('fx').value = fx();
+  $('fl-help').textContent = FLIGHT_HELP[state.flighting];
+  document.querySelectorAll('#flighting button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === state.flighting));
+
+  const { rows, t } = compute();
+  const sp = state.spread;
+  const lo = x => x * (1 - sp), hi = x => x * (1 + sp);
+  const objLabel = $('objective').selectedOptions[0].textContent;
+
+  $('plan-h').textContent = `${objLabel} plan for ${m.name}`;
+  $('plan-sub').textContent = `${fmtMoney(state.budget)} over ${state.weeks} week${state.weeks > 1 ? 's' : ''} across ${rows.length} channel${rows.length !== 1 ? 's' : ''}.`;
+
+  let kpiVal, kpiCost;
+  if (state.objective === 'awareness') { kpiVal = t.reach; kpiCost = t.impressions ? t.budget / t.impressions * 1000 : 0; }
+  else if (state.objective === 'traffic') { kpiVal = t.clicks; kpiCost = t.clicks ? t.budget / t.clicks : 0; }
+  else { kpiVal = t.conversions; kpiCost = t.conversions ? t.budget / t.conversions : 0; }
+  const k = KPI[state.objective];
+  $('headline').innerHTML = `
+    <div><div class="num-big">${fmtNum(lo(kpiVal))} to ${fmtNum(hi(kpiVal))}</div><div class="k">${k.label}</div></div>
+    <div><div class="num-big">${fmtMoney(kpiCost)}</div><div class="k">Average ${k.unitCost.toLowerCase()}</div></div>
+    <div><div class="num-big">${fmtShort(t.impressions)}</div><div class="k">Impressions</div></div>
+    <div><div class="num-big">${fmtShort(t.clicks)}</div><div class="k">Clicks</div></div>`;
+
+  // Allocation table
+  const resultHead = state.objective === 'awareness' ? 'Reach' : state.objective === 'traffic' ? 'Clicks' : 'Conversions';
+  const costHead = state.objective === 'awareness' ? 'CPM' : state.objective === 'traffic' ? 'CPC' : 'Cost per result';
+  let html = `<thead><tr><th>Channel</th><th>Share</th><th>Budget</th><th>Impressions</th><th>${resultHead}</th><th>${costHead}</th></tr></thead><tbody>`;
+  rows.forEach(r => {
+    const ch = CHANNELS.find(c => c.id === r.id);
+    const res = state.objective === 'awareness' ? r.reach : state.objective === 'traffic' ? r.clicks : r.conversions;
+    const cost = state.objective === 'awareness' ? r.cpm : state.objective === 'traffic' ? r.cpc : r.cpa;
+    html += `<tr><td><span class="chan"><span class="swatch" style="background:${ch.color}"></span>${ch.name}</span></td>
+      <td><input class="pct-input" type="number" min="0" max="100" step="1" value="${Math.round(r.share)}" data-ch="${r.id}" aria-label="${ch.short} share in percent">%</td>
+      <td>${fmtMoney(r.budget)}</td><td>${fmtNum(r.impressions)}</td>
+      <td>${fmtNum(res)} <span class="range">(${fmtNum(lo(res))} to ${fmtNum(hi(res))})</span></td>
+      <td>${cost ? fmtMoney(cost) : 'n/a'}</td></tr>`;
+  });
+  const totShare = rows.reduce((a, r) => a + r.share, 0);
+  const totRes = state.objective === 'awareness' ? t.reach : state.objective === 'traffic' ? t.clicks : t.conversions;
+  html += `</tbody><tfoot><tr><td>Total</td><td>${Math.round(totShare)}%</td><td>${fmtMoney(t.budget)}</td>
+    <td>${fmtNum(t.impressions)}</td><td>${fmtNum(totRes)}</td><td>${fmtMoney(kpiCost)}</td></tr></tfoot>`;
+  $('alloc').innerHTML = html;
+  $('alloc').querySelectorAll('.pct-input').forEach(inp => inp.addEventListener('change', onShareEdit));
+
+  // Flowchart
+  const maxCell = Math.max(...rows.flatMap(r => r.week.map(w => w * r.budget)), 1);
+  let fh = '<thead><tr><th></th>';
+  for (let i = 1; i <= state.weeks; i++) fh += `<th scope="col">W${i}</th>`;
+  fh += '</tr></thead><tbody>';
+  rows.forEach(r => {
+    const ch = CHANNELS.find(c => c.id === r.id);
+    fh += `<tr><th scope="row"><span class="chan"><span class="swatch" style="background:${ch.color}"></span>${ch.short}</span></th>`;
+    r.week.forEach((w, i) => {
+      const amt = w * r.budget;
+      if (amt <= 0) { fh += '<td></td>'; return; }
+      const alpha = 0.3 + 0.7 * (amt / maxCell);
+      const light = alpha < 0.6 ? ' light' : '';
+      fh += `<td title="${ch.short}, week ${i + 1}: ${fmtMoney(amt)}"><div class="burst${light}" style="background:${rgba(ch.color, alpha)}">${fmtShort(amt)}</div></td>`;
+    });
+    fh += '</tr>';
+  });
+  fh += '</tbody><tfoot><tr><th>Total</th>';
+  for (let i = 0; i < state.weeks; i++) {
+    const wk = rows.reduce((a, r) => a + r.week[i] * r.budget, 0);
+    fh += `<td>${fmtShort(wk)}</td>`;
+  }
+  fh += '</tr></tfoot>';
+  $('flow').innerHTML = fh;
+
+  // Benchmarks
+  const b = bench();
+  let bh = '<thead><tr><th>Channel</th><th>CPM (USD)</th><th>CTR %</th><th>Conv. rate %</th><th>Frequency</th></tr></thead><tbody>';
+  CHANNELS.forEach(ch => {
+    bh += `<tr><td>${ch.name}</td>` + b[ch.id].map((v, j) =>
+      `<td><input type="number" step="0.1" min="0" value="${v}" data-ch="${ch.id}" data-j="${j}" aria-label="${ch.short} ${['CPM', 'CTR', 'conversion rate', 'frequency'][j]}"></td>`).join('') + '</tr>';
+  });
+  $('bench').innerHTML = bh + '</tbody>';
+  $('bench').querySelectorAll('input').forEach(inp => inp.addEventListener('change', onBenchEdit));
+
+  saveHash();
+}
+
+function onShareEdit(e) {
+  const s = Object.assign({}, shares());
+  s[e.target.dataset.ch] = Math.max(0, Math.min(100, Number(e.target.value) || 0));
+  // Scale the other channels so the total stays at 100
+  const others = state.channels.filter(c => c !== e.target.dataset.ch);
+  const rest = 100 - s[e.target.dataset.ch];
+  const otherTotal = others.reduce((a, c) => a + s[c], 0);
+  others.forEach(c => s[c] = otherTotal > 0 ? s[c] / otherTotal * rest : rest / others.length);
+  state.custom = s;
+  render();
+}
+
+function onBenchEdit(e) {
+  const b = bench();
+  b[e.target.dataset.ch][Number(e.target.dataset.j)] = Number(e.target.value) || 0;
+  state.bench = b;
+  render();
+}
+
+function buildBriefControls() {
+  $('market').innerHTML = Object.entries(MARKETS).map(([k, m]) => `<option value="${k}">${m.name}</option>`).join('');
+  $('channels').innerHTML = CHANNELS.map(c =>
+    `<label><input type="checkbox" value="${c.id}"> ${c.short}</label>`).join('');
+}
+
+function syncBriefControls() {
+  $('market').value = state.market;
+  $('budget').value = state.budget;
+  $('weeks').value = state.weeks;
+  $('objective').value = state.objective;
+  $('spread').value = String(state.spread);
+  document.querySelectorAll('#channels input').forEach(i => i.checked = state.channels.includes(i.value));
+}
+
+function saveHash() {
+  const data = { m: state.market, b: state.budget, w: state.weeks, o: state.objective, f: state.flighting,
+    c: state.channels, s: state.custom, x: state.fx, sp: state.spread, bn: state.bench };
+  history.replaceState(null, '', '#' + encodeURIComponent(btoa(JSON.stringify(data))));
+}
+
+function loadHash() {
+  if (!location.hash) return;
+  try {
+    const d = JSON.parse(atob(decodeURIComponent(location.hash.slice(1))));
+    Object.assign(state, { market: d.m, budget: d.b, weeks: d.w, objective: d.o, flighting: d.f,
+      channels: d.c, custom: d.s, fx: d.x, spread: d.sp || 0.25, bench: d.bn });
+  } catch (e) { /* ignore a broken link and use defaults */ }
+}
+
+function downloadCsv() {
+  const { rows, t } = compute();
+  const lines = [['Channel', 'Share %', 'Budget (' + cur() + ')', 'Impressions', 'Est. reach', 'Clicks', 'Conversions',
+    'CPM', 'CPC', 'Cost per conversion'].concat([...Array(state.weeks)].map((_, i) => 'Week ' + (i + 1)))];
+  rows.forEach(r => {
+    const ch = CHANNELS.find(c => c.id === r.id);
+    lines.push([ch.name, r.share.toFixed(1), r.budget.toFixed(0), r.impressions.toFixed(0), r.reach.toFixed(0),
+      r.clicks.toFixed(0), r.conversions.toFixed(1), r.cpm.toFixed(2), r.cpc.toFixed(2), r.cpa.toFixed(2)]
+      .concat(r.week.map(w => (w * r.budget).toFixed(0))));
+  });
+  lines.push(['Total', '100', t.budget.toFixed(0), t.impressions.toFixed(0), t.reach.toFixed(0), t.clicks.toFixed(0),
+    t.conversions.toFixed(1), '', '', '']);
+  lines.push([]);
+  lines.push(['Estimates use indicative benchmarks. Replace with your own account data.']);
+  const csv = lines.map(l => l.map(v => /[",]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = `media-plan-${state.market}-${state.objective}.csv`;
+  a.click();
+}
+
+function roundNice(x) {
+  if (x <= 0) return 0;
+  const step = Math.pow(10, Math.max(Math.floor(Math.log10(x)) - 1, 0));
+  return Math.round(x / step) * step;
+}
+
+// Events
+$('market').addEventListener('change', e => {
+  const prev = MARKETS[state.market];
+  state.market = e.target.value;
+  const m = MARKETS[state.market];
+  state.budget = roundNice(state.budget / prev.fx * m.fx);
+  state.bench = null; state.fx = null;
+  syncBriefControls(); render();
+});
+$('budget').addEventListener('input', e => { state.budget = Math.max(0, Number(e.target.value) || 0); render(); });
+$('weeks').addEventListener('input', e => { state.weeks = Math.max(1, Math.min(26, Number(e.target.value) || 1)); render(); });
+$('objective').addEventListener('change', e => { state.objective = e.target.value; state.channels = [...DEFAULT_CHANNELS[state.objective]];
+  state.custom = null; syncBriefControls(); render(); });
+$('channels').addEventListener('change', () => {
+  const sel = [...document.querySelectorAll('#channels input:checked')].map(i => i.value);
+  if (!sel.length) { syncBriefControls(); return; }
+  state.channels = CHANNELS.map(c => c.id).filter(id => sel.includes(id));
+  state.custom = null; render(); });
+document.querySelectorAll('#flighting button').forEach(b => b.addEventListener('click', () => { state.flighting = b.dataset.v; render(); }));
+$('reset').addEventListener('click', () => { state.custom = null; render(); });
+$('fx').addEventListener('change', e => { state.fx = Number(e.target.value) || null; render(); });
+$('spread').addEventListener('change', e => { state.spread = Number(e.target.value); render(); });
+$('dl').addEventListener('click', downloadCsv);
+$('print').addEventListener('click', () => window.print());
+$('share').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(location.href); $('share').textContent = 'Link copied'; }
+  catch (e) { $('share').textContent = 'Copy the address bar'; }
+  setTimeout(() => $('share').textContent = 'Copy share link', 2000);
+});
+
+buildBriefControls();
+loadHash();
+syncBriefControls();
+render();
+</script>
+</body>
+</html>
