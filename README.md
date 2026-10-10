@@ -4,7 +4,7 @@ A free, single-page tool that turns a budget and a campaign goal into a first-dr
 
 Built for the first 30 minutes of planning, when a client asks "what would 1.5 million rupees get us?" and you need a defensible starting point before the detailed plan. It covers markets most planning tools ignore: **Pakistan, the UAE and Saudi Arabia**, alongside the US and UK.
 
-**Live demo:** `https://YOUR-USERNAME.github.io/media-plan-generator/`
+**Live demo:** `https://ghazanfar111212.github.io/media-plan-generator/`
 
 ![Media Plan Generator](docs/screenshot.png)
 
@@ -41,7 +41,7 @@ Open `index.html` in any browser. There's nothing to install and no build step.
 1. Push this repo to GitHub.
 2. Go to Settings > Pages.
 3. Under "Build and deployment", choose **Deploy from a branch**, then select `main` and `/ (root)`.
-4. After a minute your tool is live at `https://YOUR-USERNAME.github.io/media-plan-generator/`.
+4. After a minute your tool is live at `https://ghazanfar111212.github.io/media-plan-generator/`.
 
 Update the GitHub link in the page footer to point at your repo.
 
